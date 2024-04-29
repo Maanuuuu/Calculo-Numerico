@@ -1,9 +1,15 @@
-# A fletapp Flet app
+  # Flet App
 
-An example of a minimal Flet app.
+Una pequeña aplicacion To-Do que hice empleando Flet.
 
-To run the app:
-
+Para correr la aplicacion utiliza:
 ```
 flet run [app_directory]
 ```
+si salta el error de "Directorio invalido" prueba con:
+
+flet run flet\FletApp
+
+si quieres ejecutar la aplicacion en web utiiza el comando:
+
+flet run --web flet\FletApp
