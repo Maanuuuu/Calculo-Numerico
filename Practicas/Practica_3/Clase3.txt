@@ -1,0 +1,8 @@
+Investigar implementacions csv
+
+Investigar Slicing and Striding (cortar y caminar kuaskuakus)
+
+3.4 Metodo Gauss-Jordan blog.espol.edu.ec
+
+Hacer diseño principal en Figma
+
