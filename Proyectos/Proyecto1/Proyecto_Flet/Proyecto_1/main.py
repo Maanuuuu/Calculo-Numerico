@@ -10,17 +10,89 @@ def main(page: ft.Page):
     page.theme_mode=ft.ThemeMode.LIGHT
     page.bottom_appbar
     
+    def dropclicked(e):
+        dp2.options.clear()
+        dp2.value=None
+        tf1.value=None
+        tf2.value=None
+        options=["Decimal","Binario","Octal","Hexadecimal"]
+        if dp1.value in options:
+            options.remove(dp1.value)
+            for i in range(len(options)):
+                dp2.options.append(ft.dropdown.Option(options[i]))
+        dp2.disabled=False
+        page.update()
     
-    switchi=ft.Dropdown(
-        width=130,
+    def determinar_base(value):
+        if value=="Decimal":
+            base=10
+        elif value=="Binario":
+            base=2
+        elif value=="Octal":
+            base=8
+        elif value=="Hexadecimal":
+            base=16
+    
+        return base
+    
+    
         
+    dp1=ft.Dropdown(
+        width=130,
+        height=50,
+        text_size=16,
+        on_change=dropclicked,
         options=[
-            ft.dropdown.Option("Binario"),
             ft.dropdown.Option("Decimal"),
+            ft.dropdown.Option("Binario"),
+            ft.dropdown.Option("Octal"),
             ft.dropdown.Option("Hexadecimal"),
             
             
         ])
+    
+    base1=base2=0
+    def dp2bases(e):
+        global base1
+        global base2
+        base1=determinar_base(str(dp1.value))
+        base2=determinar_base(str(dp2.value))
+        
+    def base_a_decimal(numero, base):
+        decimal = 0
+        for i in range(len(numero)):
+            digito = int(numero[len(numero) - 1 - i], base)
+            decimal += digito * (base ** i)
+        return decimal
+
+    def decimal_a_base(decimal, base):
+        if decimal == 0:
+            return "0"
+
+        caracteres = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        resultado = ""
+        while decimal > 0:
+            resultado = caracteres[decimal % base] + resultado
+            decimal //= base
+
+        tf2.value=resultado
+        page.update()
+        
+    def proceso(e):
+        global base2
+        global base1
+        deci=base_a_decimal(str(tf1.value),base1)
+        decimal_a_base(deci,base2)
+        
+        
+    dp2=ft.Dropdown(
+        text_size=16,
+        height=50,
+        width=130,
+        disabled=True,
+        on_change=dp2bases
+            
+        )
     
     tf1=ft.TextField(
                      
@@ -56,52 +128,21 @@ def main(page: ft.Page):
                      border_color=ft.colors.BLACK
                      )
     
-    def clicked(e):
-        tf2.value=tf1.value
-        page.update()
-        
-    def decimal(e):
-        binario=float(tf1.value)
-        decimal = 0
-        i = 0
-        while (binario>0):
-            digito  = binario%10
-            binario = int(binario//10)
-            decimal = decimal+digito*(2**i)
-            i = i+1
-        
-        tf2.value=int(decimal)
-        
-        tf1.focus()
-        page.update()
-    
-    def hexadecimal(e):
-        num_binario=str(tf1.value)
-        num_decimal = int(num_binario, 2)
-        tf2.value= hex(num_decimal)[2:]
-        tf1.focus()
-        page.update()
 
-    def binario_to_octal(e):
-        num_binario=tf1.value
-        num_decimal = int(num_binario, 2)
-        tf1.focus()
-        tf2.value= oct(num_decimal)[2:]
-        page.update()  
-        
-                  
+              
     
     
-    btn1=ft.FilledButton(text="Decimal",width=100,height=45,on_click=decimal)
-    btn2=ft.FilledButton(text="Hexadecimal",width=140,height=45,on_click=hexadecimal)
-    btn3=ft.FilledButton(text="Octal",width=100,height=45,on_click=binario_to_octal)
-    texto=ft.Text("Conversion de Numero binario",size=20)
+    ejecutar=ft.FilledButton(text="Ejecutar",width=200,height=45,on_click=proceso)
+    texto=ft.Text("Convertir numero de: ",size=20)
+    texto2=ft.Text(" a: ",size=20)
+    
+    
     
     page.add(ft.Column(controls=[
-        ft.Row(controls=[texto,switchi],alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+        ft.Row(controls=[texto,dp1,texto2,dp2]),
         ft.Container(height=0),
         ft.Row(controls=[tf1,tf2],alignment=ft.MainAxisAlignment.CENTER,spacing=50),
-        ft.Row(controls=[btn1,btn2,btn3],alignment=ft.MainAxisAlignment.CENTER,spacing=50)
+        ft.Row(controls=[ejecutar],alignment=ft.MainAxisAlignment.CENTER,spacing=50)
         ],spacing=20))
     page.update()
     

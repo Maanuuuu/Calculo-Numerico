@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./Proyecto_Flet/Proyecto_1"
+    ]
+}
