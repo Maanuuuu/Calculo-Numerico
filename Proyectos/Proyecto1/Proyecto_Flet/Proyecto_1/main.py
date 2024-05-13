@@ -1,5 +1,5 @@
 import flet as ft
-
+import random as rd
 
 def main(page: ft.Page):
     page.window_center()
@@ -20,6 +20,17 @@ def main(page: ft.Page):
             for i in range(len(options)):
                 dp2.options.append(ft.dropdown.Option(options[i]))
         dp2.disabled=False
+        tf1.read_only=False
+        bs1=str(dp1.value)
+        if bs1==("Decimal"):
+            tf1.input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9]", replacement_string="")
+        elif bs1==("Binario"):
+            tf1.input_filter=ft.InputFilter(allow=True, regex_string=r"[0-1]", replacement_string="")
+        elif bs1==("Octal"):
+            tf1.input_filter=ft.InputFilter(allow=True, regex_string=r"[0-7]", replacement_string="")
+        elif bs1==("Hexadecimal"):
+            tf1.input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9ABCDEF]", replacement_string="")
+        
         page.update()
     
     def determinar_base(value):
@@ -31,9 +42,11 @@ def main(page: ft.Page):
             base=8
         elif value=="Hexadecimal":
             base=16
-    
+        
         return base
     
+    
+        
      
     base1=base2=0
     def dp2bases(e):
@@ -41,7 +54,10 @@ def main(page: ft.Page):
         global base2
         base1=determinar_base(str(dp1.value))
         base2=determinar_base(str(dp2.value))
-        
+        tf2.value=None
+        page.update()
+
+
     def base_a_decimal(numero, base):
         decimal = 0
         for i in range(len(numero)):
@@ -68,6 +84,8 @@ def main(page: ft.Page):
         try:
             deci=base_a_decimal(str(tf1.value),base1)
             decimal_a_base(deci,base2)
+            tf1.focus()
+            
         except Exception:
             print("Operacion Invalida")
 
@@ -75,16 +93,17 @@ def main(page: ft.Page):
         if rail.selected_index==0:
             General_Row.controls.clear()
             General_Row.controls.append(rail)
-            General_Row.controls.append(ft.VerticalDivider(width=1))
+            General_Row.controls.append(ft.VerticalDivider(width=1,color=ft.colors.BLACK45))
             General_Row.controls.append(pagina1)
-
+            dp1.value=dp2.value=tf1.value=tf2.value=None
             
             
         elif rail.selected_index==1:
             General_Row.controls.clear()
             General_Row.controls.append(rail)
-            General_Row.controls.append(ft.VerticalDivider(width=1))
+            General_Row.controls.append(ft.VerticalDivider(width=1,color=ft.colors.BLACK45))
             General_Row.controls.append(pagina2)
+            dp1.value=dp2.value=tf1.value=tf2.value=None
         page.update()
     
     dp1=ft.Dropdown(
@@ -111,8 +130,8 @@ def main(page: ft.Page):
             
         )
     
-    tf1=ft.TextField(
-                     
+    tf1=ft.TextField(input_filter=ft.InputFilter(allow=True,regex_string=r"[0-9]"),
+                     read_only=True,
                      border=True,
                      border_radius=10,
                      width=300,
@@ -125,9 +144,10 @@ def main(page: ft.Page):
                      filled=True,
                      label_style=ft.TextStyle(size=15,color=ft.colors.BLACK),
                      border_width=2,
-                     border_color=ft.colors.BLACK
+                     border_color=ft.colors.BLACK,
+                     
                      )
-    
+
     tf2=ft.TextField(
                      read_only=True,
                      border=True,
@@ -192,18 +212,70 @@ def main(page: ft.Page):
             ft.Row(controls=[ft.Container(width=176),ejecutar],alignment=ft.MainAxisAlignment.CENTER,spacing=50)
             ],spacing=20,horizontal_alignment=ft.MainAxisAlignment.CENTER)
 
+    def generar_matriz(e):
+        
+        size=int(tam.value)
+        x=[]
+        col=[]
+        filas=ft.Row(spacing=10,expand=True)
+        x=ft.Column()
+        
+        for i in range(size):
+            columna=ft.Column()
+            for j in range(size):
+                    columna.controls.append(ft.TextField(height=30,width=70,text_size=15,text_vertical_align=-0.5,input_filter=ft.NumbersOnlyInputFilter()))
+                    
+            x.controls.append(ft.TextField(height=30,width=70,text_size=15,text_vertical_align=-0.5,input_filter=ft.NumbersOnlyInputFilter()))     
+            filas.controls.append(columna)
+             
+        filas.controls.append(ft.VerticalDivider(width=5,color=ft.colors.BLACK45,trailing_indent=160,leading_indent=30))   
+        filas.controls.append(x)
+        pagina2.controls.append(filas)
+        btnrandom=ft.ElevatedButton(text="Llenado Random",on_click=llenadorandom) 
+        pagina2.controls.append(btnrandom) 
+        page.update()  
+        pagina2.controls.remove(filas)
+        pagina2.controls.remove(btnrandom)
     
-    tam=ft.TextField(text_size=16,height=20)
-    pagina2=        ft.Column(controls=[
+    def llenadorandom(e):
+        size=int(tam.value)
+        x=[]
+        col=[]
+        filas=ft.Row(spacing=10,expand=True)
+        x=ft.Column()
         
-        ft.Row(controls=[ft.Text("Ingrese el tamaño de la matriz NxN: ",size=20),tam])
+        for i in range(size):
+            columna=ft.Column()
+            for j in range(size):
+                    columna.controls.append(ft.TextField(value=rd.randint(0,100),height=30,width=70,text_size=15,text_vertical_align=-0.5,input_filter=ft.NumbersOnlyInputFilter()))
+                    
+            x.controls.append(ft.TextField(value=rd.randint(0,100),height=30,width=70,text_size=15,text_vertical_align=-0.5,input_filter=ft.NumbersOnlyInputFilter()))     
+            filas.controls.append(columna)
+             
+        filas.controls.append(ft.VerticalDivider(width=5,color=ft.colors.BLACK45,trailing_indent=160,leading_indent=30))   
+        filas.controls.append(x)
+        pagina2.controls.append(filas)
+        btnrandom=ft.ElevatedButton(text="Llenado Random",on_click=llenadorandom) 
+        pagina2.controls.append(btnrandom) 
+        page.update()  
+        pagina2.controls.remove(filas)
+        pagina2.controls.remove(btnrandom)
+        
+    
+            
+    tam=ft.TextField(text_size=16,width=80,text_vertical_align=-0.5,height=40,input_filter=ft.NumbersOnlyInputFilter())
+    generar=ft.ElevatedButton(text="Generar Matriz",icon=ft.icons.ADD_CIRCLE_OUTLINE,on_click=generar_matriz)
+    pagina2=ft.Column(controls=[
+        
+        ft.Row(controls=[ft.Text("Ingrese el tamaño de la matriz NxN: ",size=18),tam,generar],spacing=20),
         
         
-    ],alignment=ft.MainAxisAlignment.START)
+        
+    ],horizontal_alignment=ft.MainAxisAlignment.CENTER,spacing=30)
     
     General_Row=ft.Row(controls=[
                 rail,
-                ft.VerticalDivider(width=1),
+                ft.VerticalDivider(width=1,color=ft.colors.BLACK45),
                 pagina1],expand=True,spacing=30,alignment=ft.MainAxisAlignment.START)
 
     
