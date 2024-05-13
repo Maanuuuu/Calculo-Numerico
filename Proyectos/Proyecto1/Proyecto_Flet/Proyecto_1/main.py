@@ -4,11 +4,10 @@ import flet as ft
 def main(page: ft.Page):
     page.window_center()
     page.window_resizable=False
-    page.window_width=800
-    page.window_height=500
-    page.padding=50
+    page.window_width=1000
+    page.window_height=600
+    page.padding=20
     page.theme_mode=ft.ThemeMode.LIGHT
-    page.bottom_appbar
     
     def dropclicked(e):
         dp2.options.clear()
@@ -35,22 +34,7 @@ def main(page: ft.Page):
     
         return base
     
-    
-        
-    dp1=ft.Dropdown(
-        width=130,
-        height=50,
-        text_size=16,
-        on_change=dropclicked,
-        options=[
-            ft.dropdown.Option("Decimal"),
-            ft.dropdown.Option("Binario"),
-            ft.dropdown.Option("Octal"),
-            ft.dropdown.Option("Hexadecimal"),
-            
-            
-        ])
-    
+     
     base1=base2=0
     def dp2bases(e):
         global base1
@@ -81,9 +65,42 @@ def main(page: ft.Page):
     def proceso(e):
         global base2
         global base1
-        deci=base_a_decimal(str(tf1.value),base1)
-        decimal_a_base(deci,base2)
-        
+        try:
+            deci=base_a_decimal(str(tf1.value),base1)
+            decimal_a_base(deci,base2)
+        except Exception:
+            print("Operacion Invalida")
+
+    def cambio_pag(e):
+        if rail.selected_index==0:
+            General_Row.controls.clear()
+            General_Row.controls.append(rail)
+            General_Row.controls.append(ft.VerticalDivider(width=1))
+            General_Row.controls.append(pagina1)
+
+            
+            
+        elif rail.selected_index==1:
+            General_Row.controls.clear()
+            General_Row.controls.append(rail)
+            General_Row.controls.append(ft.VerticalDivider(width=1))
+            General_Row.controls.append(pagina2)
+        page.update()
+    
+    dp1=ft.Dropdown(
+        width=130,
+        height=50,
+        text_size=16,
+        on_change=dropclicked,
+        options=[
+            ft.dropdown.Option("Decimal"),
+            ft.dropdown.Option("Binario"),
+            ft.dropdown.Option("Octal"),
+            ft.dropdown.Option("Hexadecimal"),
+            
+            
+        ])
+   
         
     dp2=ft.Dropdown(
         text_size=16,
@@ -128,22 +145,72 @@ def main(page: ft.Page):
                      border_color=ft.colors.BLACK
                      )
     
-
-              
-    
-    
     ejecutar=ft.FilledButton(text="Ejecutar",width=200,height=45,on_click=proceso)
     texto=ft.Text("Convertir numero de: ",size=20)
     texto2=ft.Text(" a: ",size=20)
     
+    img = ft.Image(
+        src=f"codificacion.png",
+        width=100,
+        height=100,
+        fit=ft.ImageFit.CONTAIN,
+    )
     
+    rail=ft.NavigationRail(
+        selected_index=0,
+        label_type=None,
+        min_width=40,
+        height=800,
+        extended=True,
+        min_extended_width=40,
+        leading=img,
+        group_alignment=-1,
+        destinations=[
+            ft.NavigationRailDestination(
+                icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
+                selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                label_content=ft.Text("Conversion",size=16),padding=15
+            ),
+            ft.NavigationRailDestination(
+                icon=ft.icons.SETTINGS_OUTLINED,
+                selected_icon_content=ft.Icon(ft.icons.SETTINGS),
+                label_content=ft.Text("Gauss-Jordan",size=16),padding=15
+                
+            ),
+        ],
+        on_change=cambio_pag,
+    )
     
-    page.add(ft.Column(controls=[
-        ft.Row(controls=[texto,dp1,texto2,dp2]),
-        ft.Container(height=0),
-        ft.Row(controls=[tf1,tf2],alignment=ft.MainAxisAlignment.CENTER,spacing=50),
-        ft.Row(controls=[ejecutar],alignment=ft.MainAxisAlignment.CENTER,spacing=50)
-        ],spacing=20))
+
+        
+        
+    
+    pagina1=        ft.Column(controls=[
+            ft.Row(controls=[texto,dp1,texto2,dp2],spacing=10),
+            ft.Container(height=1),
+            ft.Row(controls=[tf1,tf2],alignment=ft.MainAxisAlignment.CENTER,spacing=50),
+            ft.Row(controls=[ft.Container(width=176),ejecutar],alignment=ft.MainAxisAlignment.CENTER,spacing=50)
+            ],spacing=20,horizontal_alignment=ft.MainAxisAlignment.CENTER)
+
+    
+    tam=ft.TextField(text_size=16,height=20)
+    pagina2=        ft.Column(controls=[
+        
+        ft.Row(controls=[ft.Text("Ingrese el tamaño de la matriz NxN: ",size=20),tam])
+        
+        
+    ],alignment=ft.MainAxisAlignment.START)
+    
+    General_Row=ft.Row(controls=[
+                rail,
+                ft.VerticalDivider(width=1),
+                pagina1],expand=True,spacing=30,alignment=ft.MainAxisAlignment.START)
+
+    
+    page.add(
+        General_Row
+    )
+    
     page.update()
     
 
