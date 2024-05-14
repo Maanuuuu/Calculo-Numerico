@@ -1,5 +1,7 @@
 import flet as ft
 import random as rd
+from Metodos import *
+import numpy as np
 
 def main(page: ft.Page):
     page.window_center()
@@ -8,6 +10,8 @@ def main(page: ft.Page):
     page.window_height=600
     page.padding=20
     page.theme_mode=ft.ThemeMode.LIGHT
+    
+    #Metodos de Botones
     
     def dropclicked(e):
         dp2.options.clear()
@@ -32,23 +36,9 @@ def main(page: ft.Page):
             tf1.input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9ABCDEF]", replacement_string="")
         
         page.update()
-    
-    def determinar_base(value):
-        if value=="Decimal":
-            base=10
-        elif value=="Binario":
-            base=2
-        elif value=="Octal":
-            base=8
-        elif value=="Hexadecimal":
-            base=16
-        
-        return base
-    
-    
-        
      
     base1=base2=0
+    
     def dp2bases(e):
         global base1
         global base2
@@ -57,35 +47,16 @@ def main(page: ft.Page):
         tf2.value=None
         page.update()
 
-
-    def base_a_decimal(numero, base):
-        decimal = 0
-        for i in range(len(numero)):
-            digito = int(numero[len(numero) - 1 - i], base)
-            decimal += digito * (base ** i)
-        return decimal
-
-    def decimal_a_base(decimal, base):
-        if decimal == 0:
-            return "0"
-
-        caracteres = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        resultado = ""
-        while decimal > 0:
-            resultado = caracteres[decimal % base] + resultado
-            decimal //= base
-
-        tf2.value=resultado
-        page.update()
-        
+    
     def proceso(e):
         global base2
         global base1
         try:
             deci=base_a_decimal(str(tf1.value),base1)
-            decimal_a_base(deci,base2)
+            result=decimal_a_base(deci,base2)
+            tf2.value=result
             tf1.focus()
-            
+            page.update()
         except Exception:
             print("Operacion Invalida")
 
@@ -105,6 +76,87 @@ def main(page: ft.Page):
             General_Row.controls.append(pagina2)
             dp1.value=dp2.value=tf1.value=tf2.value=None
         page.update()
+    
+
+    
+    def validacion(Cont_matriz,size):
+
+        bandera = False
+        elementos = 0
+
+        for fila in Cont_matriz.controls:
+            for texfield in fila.controls:
+                if(texfield.value != ""):
+                    elementos += 1
+
+        if(size != ""):
+            if(elementos == (size * size) + size * 2):
+                bandera = True
+
+        return bandera
+    
+    Cont_matriz=ft.Column([])
+    valores_matriz=[]
+
+    def llenado_random(e):
+        for fila in Cont_matriz.controls:
+            for textfield in fila.controls:
+                if(textfield.value==""):
+                    textfield.value=rd.randint(-50,110)
+        
+        page.update()
+    
+    x=0
+    
+    def generar_matriz(e):
+        global x
+        size=int(tam.value)
+        if ((size>=2)and (size<=7)):
+            
+            Cont_matriz.controls=[]
+            
+            for i in range(size):
+                fila=ft.Row(controls=[
+                    ft.TextField(height=30,
+                                 width=70,
+                                 text_size=15,
+                                 text_vertical_align=-0.5,
+                                 input_filter=ft.NumbersOnlyInputFilter(),
+                                 value =("=") if (j == size) else "",
+                                 read_only = (j == size)) for j in range(size + 2)])
+                    
+                Cont_matriz.controls.append(fila)
+            
+            
+            page.update()
+
+        else: 
+            alerta=ft.AlertDialog(title=ft.Text("Error"),content=ft.Text("Ingrese un valor mayor a 1 y menor a 8"))
+            page.dialog=alerta
+            alerta.open=True
+            page.update()
+       
+       
+    def recoger_valores(e):
+
+        if (validacion(Cont_matriz,int(tam.value))):
+            valores_matriz.clear()
+            
+            for fila in Cont_matriz.controls:
+                valores=[]
+                for textfield in fila.controls:
+                    valores.append(textfield.value)
+                    
+                valores_matriz.append(valores)
+            
+            solucion=realizar_GaussJordan(valores_matriz)   
+            cadena=""
+            for i in range(len(solucion)):
+                cadena+= f"X{str(i+1)} = {str(np.round(solucion[i],2))} , "
+            
+            Vector_Resultado.value=cadena  
+            page.update()
+    #Elementos de la interfaz
     
     dp1=ft.Dropdown(
         width=130,
@@ -130,7 +182,7 @@ def main(page: ft.Page):
             
         )
     
-    tf1=ft.TextField(input_filter=ft.InputFilter(allow=True,regex_string=r"[0-9]"),
+    tf1=ft.TextField(input_filter=ft.InputFilter(allow=True,regex_string=r"[0-9]",replacement_string=""),
                      read_only=True,
                      border=True,
                      border_radius=10,
@@ -212,66 +264,25 @@ def main(page: ft.Page):
             ft.Row(controls=[ft.Container(width=176),ejecutar],alignment=ft.MainAxisAlignment.CENTER,spacing=50)
             ],spacing=20,horizontal_alignment=ft.MainAxisAlignment.CENTER)
 
-    def generar_matriz(e):
-        
-        size=int(tam.value)
-        x=[]
-        col=[]
-        filas=ft.Row(spacing=10,expand=True)
-        x=ft.Column()
-        
-        for i in range(size):
-            columna=ft.Column()
-            for j in range(size):
-                    columna.controls.append(ft.TextField(height=30,width=70,text_size=15,text_vertical_align=-0.5,input_filter=ft.NumbersOnlyInputFilter()))
-                    
-            x.controls.append(ft.TextField(height=30,width=70,text_size=15,text_vertical_align=-0.5,input_filter=ft.NumbersOnlyInputFilter()))     
-            filas.controls.append(columna)
-             
-        filas.controls.append(ft.VerticalDivider(width=5,color=ft.colors.BLACK45,trailing_indent=160,leading_indent=30))   
-        filas.controls.append(x)
-        pagina2.controls.append(filas)
-        btnrandom=ft.ElevatedButton(text="Llenado Random",on_click=llenadorandom) 
-        pagina2.controls.append(btnrandom) 
-        page.update()  
-        pagina2.controls.remove(filas)
-        pagina2.controls.remove(btnrandom)
-    
-    def llenadorandom(e):
-        size=int(tam.value)
-        x=[]
-        col=[]
-        filas=ft.Row(spacing=10,expand=True)
-        x=ft.Column()
-        
-        for i in range(size):
-            columna=ft.Column()
-            for j in range(size):
-                    columna.controls.append(ft.TextField(value=rd.randint(0,100),height=30,width=70,text_size=15,text_vertical_align=-0.5,input_filter=ft.NumbersOnlyInputFilter()))
-                    
-            x.controls.append(ft.TextField(value=rd.randint(0,100),height=30,width=70,text_size=15,text_vertical_align=-0.5,input_filter=ft.NumbersOnlyInputFilter()))     
-            filas.controls.append(columna)
-             
-        filas.controls.append(ft.VerticalDivider(width=5,color=ft.colors.BLACK45,trailing_indent=160,leading_indent=30))   
-        filas.controls.append(x)
-        pagina2.controls.append(filas)
-        btnrandom=ft.ElevatedButton(text="Llenado Random",on_click=llenadorandom) 
-        pagina2.controls.append(btnrandom) 
-        page.update()  
-        pagina2.controls.remove(filas)
-        pagina2.controls.remove(btnrandom)
-        
+
     
             
     tam=ft.TextField(text_size=16,width=80,text_vertical_align=-0.5,height=40,input_filter=ft.NumbersOnlyInputFilter())
     generar=ft.ElevatedButton(text="Generar Matriz",icon=ft.icons.ADD_CIRCLE_OUTLINE,on_click=generar_matriz)
+    random=(ft.FilledButton(text="Llenado Aleatorio",on_click=llenado_random))
+    recoger=(ft.ElevatedButton(text="Realizar Operacion",icon=ft.icons.ADD,on_click=recoger_valores))
+    
+    Vector_Resultado=ft.TextField(read_only=True,width=400,height=100,text_align="CENTER",text_size=12,
+                                  multiline=True,text_vertical_align=-0.5)
     pagina2=ft.Column(controls=[
         
         ft.Row(controls=[ft.Text("Ingrese el tamaño de la matriz NxN: ",size=18),tam,generar],spacing=20),
+        ft.Container(Cont_matriz,height=270),
+        ft.Row(controls=[ft.Text("Resultado",size=17),Vector_Resultado],alignment=ft.MainAxisAlignment.CENTER,vertical_alignment=ft.VerticalAlignment.CENTER),
+        ft.Row(controls=[random,recoger],spacing=20,vertical_alignment=ft.VerticalAlignment.END,alignment="CENTER")
+  
         
-        
-        
-    ],horizontal_alignment=ft.MainAxisAlignment.CENTER,spacing=30)
+    ],horizontal_alignment=ft.MainAxisAlignment.CENTER,spacing=20,expand=True)
     
     General_Row=ft.Row(controls=[
                 rail,
