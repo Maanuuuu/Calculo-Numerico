@@ -35,60 +35,56 @@ def decimal_a_base(decimal, base):
 # Solución a Sistemas de Ecuaciones
 # de la forma A.X=B
 
-def gauss_jordan(A,B):
-
+def eliminacion_gauss_jordan(coeficientes, matriz_constantes):
     
-    casicero = 1e-15 # Considerar como 0
-
-    A = np.array(A,dtype=float) 
-
+    coeficientes = np.array(coeficientes, dtype=float)
     
-    AB = np.concatenate((A,B),axis=1)
-    AB0 = np.copy(AB)
+    matriz_aumentada = np.concatenate((coeficientes, matriz_constantes), axis=1)
+    copia = np.copy(matriz_aumentada)
 
     # Se realiza un pivoteo parcial por filas
-    tamano = np.shape(AB)
-    n    = tamano[0]
-    m = tamano[1]
+    size_matriz = np.shape(matriz_aumentada)
+    num_filas = size_matriz[0]
+    num_columnas = size_matriz[1]
 
-    for i in range(0,n-1,1):
-       
-        columna = abs(AB[i:,i])
-        max = np.argmax(columna)
+    for i in range(0, num_filas - 1, 1):
+        
+        columna = abs(matriz_aumentada[i:, i])
+        indice = np.argmax(columna)
     
         
-        if (max !=0):
+        if (indice != 0):
             # se intercambian las filas
-            temporal = np.copy(AB[i,:])
-            AB[i,:] = AB[max+i,:]
-            AB[max+i,:] = temporal
+            fila = np.copy(matriz_aumentada[i, :])
+            matriz_aumentada[i, :] = matriz_aumentada[indice + i, :]
+            matriz_aumentada[indice + i, :] = fila
         
-    AB1 = np.copy(AB)
+    matriz_aumentada_pivoteo = np.copy(matriz_aumentada)
 
-    #Proceso de eliminacion de atras hacia adelante
-    for i in range(0,n-1,1):
-        pivote = AB[i,i]
-        adelante = i + 1
-        for k in range(adelante,n,1):
-            factor = AB[k,i]/pivote
-            AB[k,:] = AB[k,:] - AB[i,:]*factor
-    AB2 = np.copy(AB)
+    # Proceso de eliminación hacia adelante
+    for i in range(0, num_filas - 1, 1):
+        pivote = matriz_aumentada[i, i]
+        fila_debajo = i + 1
+        for k in range(fila_debajo, num_filas, 1):
+            factor = matriz_aumentada[k, i] / pivote
+            matriz_aumentada[k, :] = matriz_aumentada[k, :] - matriz_aumentada[i, :] * factor
+    matriz_aumentada_eliminacion_adelante = np.copy(matriz_aumentada)
 
-    #Proceso de eliminacion de atras hacia atras
-    ultfila = n-1
-    ultcolumna = m-1
-    for i in range(ultfila,0-1,-1):
-        pivote = AB[i,i]
-        atras = i-1 
-        for k in range(atras,0-1,-1):
-            factor = AB[k,i]/pivote
-            AB[k,:] = AB[k,:] - AB[i,:]*factor
-       
-        AB[i,:] = AB[i,:]/AB[i,i]
-    X = np.copy(AB[:,ultcolumna])
-    X = np.transpose([X])
+    # Proceso de eliminación hacia atrás
+    ultima_fila = num_filas - 1
+    ultima_columna = num_columnas - 1
+    for i in range(ultima_fila, -1, -1):
+        pivote = matriz_aumentada[i, i]
+        fila_arriba = i - 1 
+        for k in range(fila_arriba, -1, -1):
+            factor = matriz_aumentada[k, i] / pivote
+            matriz_aumentada[k, :] = matriz_aumentada[k, :] - matriz_aumentada[i, :] * factor
+        
+        matriz_aumentada[i, :] = matriz_aumentada[i, :] / matriz_aumentada[i, i]
+    solucion = np.copy(matriz_aumentada[:, ultima_columna])
+    solucion = np.transpose([solucion])
 
-    return X
+    return solucion
 
 def transformacion(valores_matriz, matriz, vector):
 
@@ -119,6 +115,6 @@ def realizar_GaussJordan(valores_matriz):
     a = np.array(lista_matriz)
     b = np.array(lista_vector)
 
-    resultado = gauss_jordan(a,b)
+    resultado = eliminacion_gauss_jordan(a,b)
     
     return resultado
